@@ -137,19 +137,37 @@ class Player:
     #***********************************************************************
     def alphaBetaMove_HA(self, board, ply):
         """ Choose a move with aplha beta pruning. Returns (score, move) """
-        val = 
-        #returns the score and the associated move
-        return (-1,1)
+        move = -1
+        score = -INFINITY
+        turn = self
+        for m in board.legalMoves(self):
+            #for each legal move
+            if ply == 0:
+                #if we're at ply 0, we need to call our eval function & return
+                return (self.score(board), m)
+            if board.gameOver():
+                return (-1, -1)  # Can't make a move, the game is over
+            nb = deepcopy(board)
+            #make a new board
+            nb.makeMove(self, m)
+            #try the move
+            opp = Player(self.opp, self.type, self.ply)
+            s = opp.alphaBetaMaxValue_HA(nb, ply-1, turn, -INFINITY, INFINITY)
+            #and see what the opponent would do next
+            if s > score:
+                #if the result is better than our best score so far, save that move,score
+                move = m
+                score = s
+        #return the best score and move so far
+        return score, move
 
-    def abMaxValue_HA(self,board,ply,turn,a,b):
-        """ Find the best score for max using alpha beta pruning
-            a is alpha, the best option for max
-            b is beta, the best option for min """
+    def alphaBetaMaxValue_HA(self,board,ply,turn,alpha,beta):
+        """ Find the best score for max using alpha beta pruning """
         # Check for terminal state
         if board.gameOver():
             return turn.score(board)
         # If not, continue with alpha-beta pruning
-        val = -INFINITY
+        score = -INFINITY
         for m in board.legalMoves(self):
             if ply == 0:
                 #print "turn.score(board) in max value is: " + str(turn.score(board))
@@ -160,16 +178,41 @@ class Player:
             nextBoard = deepcopy(board)
             nextBoard.makeMove(self, m)
             # Find highest minimum value
-            s = opponent.minValue(nextBoard, ply-1, turn)
+            score = max(score, opponent.alphaBetaMinValue_HA(nextBoard, ply-1, turn, alpha, beta))
             #print "s in maxValue is: " + str(s)
-            if s > score:
-                score = s
-        return 
+            #Condition to prune branches
+            if score > beta:
+                return score
+            #If we can do better, update alpha
+            alpha = max(alpha, score)
+        return score
 
-    def abMinValue_HA(self,board,ply,turn,a,b):
+    def alphaBetaMinValue_HA(self,board,ply,turn,alpha,beta):
         """ Find the best score for min using alpha beta pruning """
-        if 
-        pass
+        # Check for terminal state
+        if board.gameOver():
+            return turn.score(board)
+        # If not, continue with alpha-beta pruning
+        score = INFINITY
+        for m in board.legalMoves(self):
+            if ply == 0:
+                #print "turn.score(board) in min Value is: " + str(turn.score(board))
+                return turn.score(board)
+            # make a new player to play the other side
+            opponent = Player(self.opp, self.type, self.ply)
+            # Copy the board so that we don't ruin it
+            nextBoard = deepcopy(board)
+            nextBoard.makeMove(self, m)
+            # Find lowest maximum value
+            score = min(score, opponent.alphaBetaMaxValue_HA(nextBoard, ply-1, turn, alpha, beta))
+            #print "s in minValue is: " + str(s)
+            # Condition to prune branches
+            if score < alpha:
+                return score
+            # If we can do better, update beta
+            beta = min(beta, score)
+        return score
+        
     #***********************************************************************
 
                 
@@ -190,7 +233,7 @@ class Player:
             print "chose move", move, " with value", val
             return move
         elif self.type == self.ABPRUNE:
-            val, move = self.alphaBetaMove(board, self.ply)
+            val, move = self.alphaBetaMove_HA(board, self.ply)
             print "chose move", move, " with value", val
             return move
         elif self.type == self.CUSTOM:
