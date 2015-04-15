@@ -132,6 +132,46 @@ class Player:
         print "Alpha Beta Move not yet implemented"
         #returns the score adn the associated moved
         return (-1,1)
+
+
+    #***********************************************************************
+    def alphaBetaMove_HA(self, board, ply):
+        """ Choose a move with aplha beta pruning. Returns (score, move) """
+        val = 
+        #returns the score and the associated move
+        return (-1,1)
+
+    def abMaxValue_HA(self,board,ply,turn,a,b):
+        """ Find the best score for max using alpha beta pruning
+            a is alpha, the best option for max
+            b is beta, the best option for min """
+        # Check for terminal state
+        if board.gameOver():
+            return turn.score(board)
+        # If not, continue with alpha-beta pruning
+        val = -INFINITY
+        for m in board.legalMoves(self):
+            if ply == 0:
+                #print "turn.score(board) in max value is: " + str(turn.score(board))
+                return turn.score(board)
+            # make a new player to play the other side
+            opponent = Player(self.opp, self.type, self.ply)
+            # Copy the board so that we don't ruin it
+            nextBoard = deepcopy(board)
+            nextBoard.makeMove(self, m)
+            # Find highest minimum value
+            s = opponent.minValue(nextBoard, ply-1, turn)
+            #print "s in maxValue is: " + str(s)
+            if s > score:
+                score = s
+        return 
+
+    def abMinValue_HA(self,board,ply,turn,a,b):
+        """ Find the best score for min using alpha beta pruning """
+        if 
+        pass
+    #***********************************************************************
+
                 
     def chooseMove(self, board):
         """ Returns the next move that this player wants to make """
