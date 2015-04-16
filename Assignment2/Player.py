@@ -115,6 +115,8 @@ class Player:
             return 0.0
         else:
             return 50.0
+            
+        
 
     # You should not modify anything before this point.
     # The code you will add to this file appears below this line.
@@ -250,6 +252,17 @@ class MancalaPlayer(Player):
         # Currently this function just calls Player's score
         # function.  You should replace the line below with your own code
         # for evaluating the board
-        print "Calling score in MancalaPlayer"
-        return Player.score(self, board)
+        if self.num==1:
+            myNum=1
+            oppNum=2
+        else:
+            myNum=2
+            oppNum=1
         
+        
+        player=sum(board.getPlayersCups(myNum))
+        opp=sum(board.getPlayersCups(oppNum))
+        myScore=board.scoreCups[myNum-1]
+        oppScore=board.scoreCups[oppNum-1]
+        
+        return 5*(myScore-oppScore)+player-opp
