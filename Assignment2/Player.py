@@ -127,15 +127,8 @@ class Player:
     # However, for your custom player, you may copy this function
     # and modify it so that it uses a different termination condition
     # and/or a different move search order.
+
     def alphaBetaMove(self, board, ply):
-        """ Choose a move with alpha beta pruning.  Returns (score, move) """
-        print "Alpha Beta Move not yet implemented"
-        #returns the score adn the associated moved
-        return (-1,1)
-
-
-    #***********************************************************************
-    def alphaBetaMove_HA(self, board, ply):
         """ Choose a move with aplha beta pruning. Returns (score, move) """
         move = -1
         score = -INFINITY
@@ -152,7 +145,7 @@ class Player:
             nb.makeMove(self, m)
             #try the move
             opp = Player(self.opp, self.type, self.ply)
-            s = opp.alphaBetaMaxValue_HA(nb, ply-1, turn, -INFINITY, INFINITY)
+            s = opp.alphaBetaMaxValue(nb, ply-1, turn, -INFINITY, INFINITY)
             #and see what the opponent would do next
             if s > score:
                 #if the result is better than our best score so far, save that move,score
@@ -161,7 +154,7 @@ class Player:
         #return the best score and move so far
         return score, move
 
-    def alphaBetaMaxValue_HA(self,board,ply,turn,alpha,beta):
+    def alphaBetaMaxValue(self,board,ply,turn,alpha,beta):
         """ Find the best score for max using alpha beta pruning """
         # Check for terminal state
         if board.gameOver():
@@ -178,7 +171,7 @@ class Player:
             nextBoard = deepcopy(board)
             nextBoard.makeMove(self, m)
             # Find highest minimum value
-            score = max(score, opponent.alphaBetaMinValue_HA(nextBoard, ply-1, turn, alpha, beta))
+            score = max(score, opponent.alphaBetaMinValue(nextBoard, ply-1, turn, alpha, beta))
             #print "s in maxValue is: " + str(s)
             #Condition to prune branches
             if score > beta:
@@ -187,7 +180,7 @@ class Player:
             alpha = max(alpha, score)
         return score
 
-    def alphaBetaMinValue_HA(self,board,ply,turn,alpha,beta):
+    def alphaBetaMinValue(self,board,ply,turn,alpha,beta):
         """ Find the best score for min using alpha beta pruning """
         # Check for terminal state
         if board.gameOver():
@@ -204,7 +197,7 @@ class Player:
             nextBoard = deepcopy(board)
             nextBoard.makeMove(self, m)
             # Find lowest maximum value
-            score = min(score, opponent.alphaBetaMaxValue_HA(nextBoard, ply-1, turn, alpha, beta))
+            score = min(score, opponent.alphaBetaMaxValue(nextBoard, ply-1, turn, alpha, beta))
             #print "s in minValue is: " + str(s)
             # Condition to prune branches
             if score < alpha:
@@ -212,8 +205,6 @@ class Player:
             # If we can do better, update beta
             beta = min(beta, score)
         return score
-        
-    #***********************************************************************
 
                 
     def chooseMove(self, board):
@@ -233,7 +224,7 @@ class Player:
             print "chose move", move, " with value", val
             return move
         elif self.type == self.ABPRUNE:
-            val, move = self.alphaBetaMove_HA(board, self.ply)
+            val, move = self.alphaBetaMove(board, self.ply)
             print "chose move", move, " with value", val
             return move
         elif self.type == self.CUSTOM:
