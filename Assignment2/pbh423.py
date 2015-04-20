@@ -231,9 +231,9 @@ class Player:
             return move
         elif self.type == self.CUSTOM:
             mySide = board.getPlayersCups(self.num)
-            for i in range (0,5):
+            for i in range (5,0,-1):
                 if mySide[i]==6-i:
-                    print "EXTRA MOVEEEEEEE"
+                    print "chose move", i+1, "so we get an extra move"
                     return i+1
             val, move = self.alphaBetaMove(board, self.ply)
             print "chose move", move, " with value", val
