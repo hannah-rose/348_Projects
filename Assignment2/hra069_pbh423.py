@@ -1,6 +1,9 @@
 # File: Player.py
-# Author(s) names AND netid's:
-# Date: 
+# Author(s) names AND netid's: 
+#   Hannah Arntson  hra069
+#   Peter Haddad    pbh423
+#   Katie George    ******
+# Date: 15 April, 2015
 # Defines a simple artificially intelligent player agent
 # You will define the alpha-beta pruning search algorithm
 # You will also define the score function in the MancalaPlayer class,
@@ -232,10 +235,11 @@ class Player:
         elif self.type == self.CUSTOM:
             mySide = board.getPlayersCups(self.num)
             for i in range (5,0,-1):
+                #Code to take opportunities for extra moves
                 if mySide[i]==6-i:
                     print "chose move", i+1, "so we get an extra move"
                     return i+1
-            val, move = self.alphaBetaMove(board, self.ply)
+            val, move = self.alphaBetaMove(board, 4)
             print "chose move", move, " with value", val
             return move
         else:
@@ -244,15 +248,13 @@ class Player:
 
 
 # Note, you should change the name of this player to be your netid
-class pbh423(Player):
+class hra069_pbh423(Player):
     """ Defines a player that knows how to evaluate a Mancala gameboard
         intelligently """
 
     def score(self, board):
         """ Evaluate the Mancala board for this player """
-        # Currently this function just calls Player's score
-        # function.  You should replace the line below with your own code
-        # for evaluating the board
+        # Evaluate board
         if self.num==1:
             myNum=1
             oppNum=2
@@ -261,9 +263,9 @@ class pbh423(Player):
             oppNum=1
         
         
-        player=sum(board.getPlayersCups(myNum))
-        opp=sum(board.getPlayersCups(oppNum))
-        myScore=board.scoreCups[myNum-1]
+        player=sum(board.getPlayersCups(myNum)) #Number of stones on your side
+        opp=sum(board.getPlayersCups(oppNum))   #Number of stones on opponent's side
+        myScore=board.scoreCups[myNum-1]        #Score board for each
         oppScore=board.scoreCups[oppNum-1]
         
-        return 5*(myScore-oppScore)+player-opp
+        return 5*(myScore-oppScore)+player-opp  #Score = your stones - opponents's stones + 5*(score difference)
