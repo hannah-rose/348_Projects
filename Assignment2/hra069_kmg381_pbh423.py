@@ -1,8 +1,8 @@
 # File: Player.py
 # Author(s) names AND netid's: 
 #   Hannah Arntson  hra069
+#   Katie George    kmg381
 #   Peter Haddad    pbh423
-#   Katie George    ******
 # Date: 15 April, 2015
 # Defines a simple artificially intelligent player agent
 # You will define the alpha-beta pruning search algorithm
@@ -239,7 +239,7 @@ class Player:
                 if mySide[i]==6-i:
                     print "chose move", i+1, "so we get an extra move"
                     return i+1
-            val, move = self.alphaBetaMove(board, 4)
+            val, move = self.alphaBetaMove(board, 5)
             print "chose move", move, " with value", val
             return move
         else:
@@ -248,7 +248,7 @@ class Player:
 
 
 # Note, you should change the name of this player to be your netid
-class hra069_pbh423(Player):
+class hra069_kmg381_pbh423(Player):
     """ Defines a player that knows how to evaluate a Mancala gameboard
         intelligently """
 
