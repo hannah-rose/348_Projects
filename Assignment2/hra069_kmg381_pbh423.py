@@ -26,7 +26,7 @@ class Player:
     ABPRUNE = 3
     CUSTOM = 4
     
-    def __init__(self, playerNum, playerType, ply=0):
+    def __init__(self, playerNum, playerType, ply=4):
         """Initialize a Player with a playerNum (1 or 2), playerType (one of
         the constants such as HUMAN), and a ply (default is 0)."""
         self.num = playerNum
