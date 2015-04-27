@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 import struct, string, math
 
+
+verbose=0
+
 class SudokuBoard:
     """This will be the sudoku board game object your player will manipulate."""
   
@@ -121,3 +124,82 @@ def solve(initial_board, forward_checking = False, MRV = False, MCV = False,
     print "Remember to return the final board (the SudokuBoard object)."
     print "I'm simply returning initial_board for demonstration purposes."
     return initial_board
+
+
+def backtrack(board):
+    """Recursive implementation to solve a Sudoku board. Uses brute force to
+    check all possible solutions. If it cannot find one, it backtracks and undos
+    one of its guesses and continues."""
+    
+    arr=getNextOpen(board)    
+    row=arr[0]
+    col=arr[1]
+    if verbose==1:
+        print "next open spot is %d, %d" % (row,col) 
+    if (row==-1):
+        #no Open Spots were found. All spots are filled so we are done
+        return True
+    
+    BoardArray = board.CurrentGameBoard
+    size = len(BoardArray)
+    
+    #we will check if any of these values work
+    for test in range (1, size+1):
+        #check if this is a valid move.
+        if verbose==1:
+            print "trying %d" % test
+        if(noConflictCheck(board,test,row,col)):
+            if verbose==1:
+                print "No conflict setting value. New Board:"
+            board.set_value(row,col,test)
+            if verbose==1:
+                board.print_board()
+            #if we are done, pass the true back through the recursion
+            if (backtrack(board)):
+                return True
+            #else undo
+            if verbose==1:
+                print "No possibilities. Undoing"
+            board.set_value(row,col,0)
+            if verbose==1:
+                board.print_board()
+            
+    #if nothing else is found go back and change the most recent value
+    return False
+                
+
+
+def getNextOpen(board):
+    """Returns the next empty spot, which is shown as a 0 in our array
+    If it can't find one, it returns [-1,-1], which means the puzzle is complet
+    Otherwise it returns an array formatted [row, col]"""
+    for i in range (0,board.BoardSize):
+        for j in range (0,board.BoardSize):
+            if board.CurrentGameBoard[i][j]==0:
+                #return the row and col 
+                return [i,j]
+    #else return false, so we are done
+    return [-1,-1]
+    
+def noConflictCheck(board,num,row,col):
+    """Shortened version of is_complete. Only checks the row, col and subsquare
+    that we are checking. """
+    BoardArray = board.CurrentGameBoard
+    size = len(BoardArray)
+    subsquare = int(math.sqrt(size))
+    
+    for i in range(size):
+        if ((BoardArray[row][i] == num) and i != col):
+            return False
+        if ((BoardArray[i][col] == num) and i != row):
+            return False
+    #determine which square the cell is in
+    SquareRow = row // subsquare
+    SquareCol = col // subsquare
+    for i in range(subsquare):
+        for j in range(subsquare):
+            if((BoardArray[SquareRow*subsquare+i][SquareCol*subsquare+j] == num)
+                and (SquareRow*subsquare + i != row)
+                and (SquareCol*subsquare + j != col)):
+                    return False
+    return True
