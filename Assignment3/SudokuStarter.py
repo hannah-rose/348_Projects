@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import struct, string, math, copy
+import struct, string, math
 
 
 verbose=0
@@ -7,10 +7,12 @@ verbose=0
 class SudokuBoard:
     """This will be the sudoku board game object your player will manipulate."""
   
-    def __init__(self, size, board):
+    def __init__(self, size, board, domain):
       """the constructor for the SudokuBoard"""
       self.BoardSize = size #the size of the board
       self.CurrentGameBoard= board #the current state of the game board
+      self.Domain = domain #the set of possible values for each cell
+
 
     def set_value(self, row, col, value):
         """This function will create a new sudoku board object with the input
@@ -113,7 +115,20 @@ def is_complete(sudoku_board):
 def init_board(file_name):
     """Creates a SudokuBoard object initialized with values from a text file"""
     board = parse_file(file_name)
-    return SudokuBoard(len(board), board)
+    domain = set_domain(board,len(board))
+    return SudokuBoard(len(board), board, domain)
+
+
+def set_domain(board,size):
+        """Initializes domain of all possibilities for each cell"""
+        #Initialize blank domain
+        domain = [ [ [ 0 for i in range(size) ] for j in range(size) ] for k in range(size) ]
+        for row in range(size):
+            for col in range(size):
+                for val in range(size):
+                    domain[row][col][val] = val+1;
+        return domain;
+
 
 def solve(initial_board, forward_checking = False, MRV = False, MCV = False,
     LCV = False):
@@ -121,9 +136,7 @@ def solve(initial_board, forward_checking = False, MRV = False, MCV = False,
     or more of the heuristics and constraint propagation methods (determined by
     arguments). Returns the resulting board solution. """
     print "Your code will solve the initial_board here!"
-    #test=getNextOpen(initial_board)
     backtrack(initial_board)
-    #initial_board.print_board()
     print "Remember to return the final board (the SudokuBoard object)."
     print "I'm simply returning initial_board for demonstration purposes."
     return initial_board
@@ -171,10 +184,14 @@ def backtrack(board):
     #if nothing else is found go back and change the most recent value
     return False
 
-def forwardcheck(board):
+
+def forwardcheck(board, row, col):
     """Forwardchecking subroutine. Every square begins with a domain of all
     possible values. After each new value is assigned,
     delete all conflicting values from other square's domains"""
+    #If there is a value, remove domain conflicts
+    if board.CurrentGameBoard[row][col]!=0:
+        print "Value here"
 
 
 
