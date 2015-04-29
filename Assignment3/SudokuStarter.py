@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import struct, string, math
+import struct, string, math, copy
 
 
 verbose=0
@@ -121,6 +121,9 @@ def solve(initial_board, forward_checking = False, MRV = False, MCV = False,
     or more of the heuristics and constraint propagation methods (determined by
     arguments). Returns the resulting board solution. """
     print "Your code will solve the initial_board here!"
+    test=getNextOpen(initial_board)
+    backtrack(initial_board)
+    #initial_board.print_board()
     print "Remember to return the final board (the SudokuBoard object)."
     print "I'm simply returning initial_board for demonstration purposes."
     return initial_board
@@ -161,12 +164,18 @@ def backtrack(board):
             if verbose==1:
                 print "No possibilities. Undoing"
             board.set_value(row,col,0)
+            #print board
             if verbose==1:
                 board.print_board()
             
     #if nothing else is found go back and change the most recent value
     return False
-                
+
+def forwardcheck(board):
+    """Forwardchecking subroutine. Every square begins with a domain of all
+    possible values. After each new value is assigned,
+    delete all conflicting values from other square's domains"""
+
 
 
 def getNextOpen(board):
