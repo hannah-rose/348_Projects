@@ -121,7 +121,7 @@ def solve(initial_board, forward_checking = False, MRV = False, MCV = False,
     or more of the heuristics and constraint propagation methods (determined by
     arguments). Returns the resulting board solution. """
     print "Your code will solve the initial_board here!"
-    test=getNextOpen(initial_board)
+    #test=getNextOpen(initial_board)
     backtrack(initial_board)
     #initial_board.print_board()
     print "Remember to return the final board (the SudokuBoard object)."
