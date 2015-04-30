@@ -15,6 +15,7 @@ class SudokuBoard:
       self.CurrentGameBoard= board #the current state of the game board
       self.Domain = domain #the set of possible values for each cell
       self.count=0
+      self.LCV_count=0
 
 
     def set_value(self, row, col, value):
@@ -249,8 +250,10 @@ def forwardcheck(board, domain, row, col):
     for i in range(size):
         if ((domain[row][i].count(val)!=0) and i != col):
             (domain[row][i]).remove(val)
+            board.LCV_count += 1
         if ((domain[i][col].count(val)!=0) and i != row):
             (domain[i][col]).remove(val)
+            board.LCV_count += 1
 
     #determine which square the cell is in and remove conflicts
     SquareRow = row // subsquare
@@ -261,12 +264,40 @@ def forwardcheck(board, domain, row, col):
                 and (SquareRow*subsquare + i != row)
                 and (SquareCol*subsquare + j != col)):
                     (domain[SquareRow*subsquare+i][SquareCol*subsquare+j]).remove(val)
+                    board.LCV_count += 1
 
     #Check for empty domains
     if domain.count([])!=0:
         return False
     return True                
 
+
+def getLCV(board, row, col):
+    """Returns the least contrained value, leaving the largest number of options
+       in the domain of other empty sqares"""
+    #Start with default high value of eliminations
+    elims = 999999
+    #Get list of possible values
+    board_test = deepcopy(board)
+    domain_test = board_test.Domain
+    dom = domain_test[row][col]
+    #See which value returns the smallest number of changes
+    for val in dom:
+        #set test value and forward check it
+        board_test.CurrentGameBoard[row][col] = val
+        board_test.LCV_count = 0
+        forwardcheck(board_test,domain_test,row,col)
+        print val
+        print board_test.LCV_count
+        #check if this value had less changes
+        if board_test.LCV_count<elims:
+            choice = val
+            elims = board_test.LCV_count
+        #reset domain to try again
+        domain_test = board.Domain
+    #return the best value
+    return choice
+            
 
 
 def getNextOpen(board):
