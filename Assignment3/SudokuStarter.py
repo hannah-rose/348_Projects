@@ -301,6 +301,40 @@ def getMRV(board):
                     minCol=j
     return [minRow,minCol]
 
+def getMLV(board):
+    maxConstraints = -1
+    minRow=-1
+    minCol=-1
+    
+    for i in range (0,board.BoardSize):
+        for j in range (0,board.BoardSize):
+            if (board.CurrentGameBoard == 0)
+                count = 0
+
+                #Check rows and columns for conflicts
+                for i in range(size):
+
+                    if (board.CurrentGameBoard[row][i]==0) and i != col):
+                        count += 1
+
+                    if (board.CurrentGameBoard[i][col]==0) and i != row):
+                        count += 1
+
+                #determine which square the cell is in and remove conflicts
+                SquareRow = row // subsquare
+                SquareCol = col // subsquare
+                for i in range(subsquare):
+                    for j in range(subsquare):
+                        if((board.CurrentGameBoard[SquareRow*subsquare+i][SquareCol*subsquare+j]).count(val)==0
+                            and (SquareRow*subsquare + i != row)
+                            and (SquareCol*subsquare + j != col)):
+                                count += 1  
+            if maxConstraints > count:
+                count = maxConstraints
+                minRow = i
+                minCol = j
+    return [minRow,minCol]                                     
+
             
 
 def noConflictCheck(board,num,row,col):
