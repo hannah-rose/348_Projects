@@ -9,11 +9,11 @@ from SudokuStarter import *
 
 verbose=0
 
-b=init_board("input_puzzles/easy/25_25.sudoku")
+b=init_board("input_puzzles/easy/9_9.sudoku")
 b.print_board()
 #test=getNextOpen(b)
 #backtrack(b)
-solved_board = solve(b,True)
+solved_board = solve(b,True,True)
 #b.print_board()
 solved_board.print_board()
 print is_complete(solved_board)
