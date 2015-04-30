@@ -225,25 +225,30 @@ def back_forward(board, domain,MRV,MCV,LCV):
     BoardArray = board.CurrentGameBoard
     size = len(BoardArray)
     
-    dom=domain[row][col]
     #If LCV, sort domain of variable
     if (LCV==True):
-        dom = getLCV(board,row,col)
+        dom = getLCV(board,domain,row,col)
+    else:
+        dom=domain[row][col]
     print dom
     #Check each value in domain
     for test in dom:
+        print test
         board.count+=1
         #check if this test is a valid move.
         if(noConflictCheck(board,test,row,col)):
             #Set new value
             domain_test = deepcopy(domain)
+            print domain_test
             board.set_value(row,col,test)
+            board.print_board()
             #Assess its domain and check for empty domains
             if forwardcheck(board, domain_test, row, col):
                 if back_forward(board, domain_test,MRV,MCV,LCV):
                     return True
             #else undo the move and keep trying
-            board.set_value(row,col,0)         
+            board.set_value(row,col,0)
+            domain = board.Domain        
     #if nothing else is found go back and change the most recent value
     return False
 
@@ -282,13 +287,13 @@ def forwardcheck(board, domain, row, col):
     return True                
 
 
-def getLCV(board, row, col):
+def getLCV(board, domain, row, col):
     """Finds the least contrained value, leaving the largest number of options
        in the domain of other empty sqares. Returns the domain of a variable, sorted
        so that the LCV will be tried first"""
     #Get list of possible values
     board_test = deepcopy(board)
-    domain_test = board_test.Domain
+    domain_test = deepcopy(domain)
     dom = domain_test[row][col]
 
     #turn the domain into an empty dictionary
@@ -303,11 +308,10 @@ def getLCV(board, row, col):
         #Add LCV_count to dictionary
         dom_dict[val]=board_test.LCV_count
         #reset domain to try again for next test
-        domain_test = board.Domain
+        domain_test = domain
         
     #sort dictionary by LCV_counts and return the sorted domain
     dom_sort = sorted(dom_dict, key=dom_dict.__getitem__)
-    print dom_sort 
     return dom_sort
             
 
@@ -324,6 +328,7 @@ def getNextOpen(board):
     #else return false, so we are done
     return [-1,-1]
     
+
 def getMRV(board):
     minDomain=999
     minRow=-1
@@ -338,6 +343,7 @@ def getMRV(board):
                     minCol=j
     return [minRow,minCol]
 
+
 def getMLV(board):
     maxConstraints = -1
     minRow=-1
@@ -345,16 +351,16 @@ def getMLV(board):
     
     for i in range (0,board.BoardSize):
         for j in range (0,board.BoardSize):
-            if (board.CurrentGameBoard == 0)
+            if (board.CurrentGameBoard == 0):
                 count = 0
 
                 #Check rows and columns for conflicts
                 for i in range(size):
 
-                    if (board.CurrentGameBoard[row][i]==0) and i != col):
+                    if ((board.CurrentGameBoard[row][i]==0) and i != col):
                         count += 1
 
-                    if (board.CurrentGameBoard[i][col]==0) and i != row):
+                    if ((board.CurrentGameBoard[i][col]==0) and i != row):
                         count += 1
 
                 #determine which square the cell is in and remove conflicts
