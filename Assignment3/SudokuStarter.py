@@ -123,7 +123,8 @@ def init_board(file_name):
 
 
 def create_domain(board,size):
-    """Initializes domain of all possibilities for each cell"""
+    """Initializes domain of all possibilities for each cell
+       Called from init_board"""
     #Initialize blank domain
     domain = [ [ 0 for i in range(size) ] for j in range(size) ]
     #Fill in with every possible option
@@ -134,7 +135,8 @@ def create_domain(board,size):
 
 
 def init_domain(board,size):
-    """Uses forward checking to remove conflicts from initial puzzle"""
+    """Uses forward checking to remove conflicts from initial puzzle.
+       Must be called after init_board to work correctly"""
     domain = board.Domain
     BoardArray = board.CurrentGameBoard
     #Update conflicts based on items already in the sudoku
@@ -142,7 +144,7 @@ def init_domain(board,size):
         for col in range(size):
             if (BoardArray[row][col])!=0:
                 domain[row][col] = [ BoardArray[row][col] ]
-                forwardcheck(board,row,col)
+                forwardcheck(board,domain,row,col)
     return domain
 
 
@@ -150,12 +152,18 @@ def init_domain(board,size):
 def solve(initial_board, forward_checking = False, MRV = False, MCV = False,
     LCV = False):
     """Takes an initial SudokuBoard and solves it using back tracking, and zero
-    or more of the heuristics and constraint propagation methods (determined by
-    arguments). Returns the resulting board solution. """
-    print "Your code will solve the initial_board here!"
-    backtrack(initial_board)
-    print "Remember to return the final board (the SudokuBoard object)."
-    print "I'm simply returning initial_board for demonstration purposes."
+       or more of the heuristics and constraint propagation methods (determined by
+       arguments). Returns the resulting board solution. """
+    #Begin by initializing the domain
+    init_domain(initial_board,initial_board.BoardSize)
+
+    print "Be patient! We're working on solving your puzzle..."
+
+    #Call backtrack with the required constraints
+    if forward_checking:
+        back_forward(initial_board, initial_board.Domain)
+    else:
+        backtrack(initial_board)
     return initial_board
 
 
@@ -178,35 +186,56 @@ def backtrack(board):
     
     #we will check if any of these values work
     for test in range (1, size+1):
-        #check if this is a valid move.
-        if verbose==1:
-            print "trying %d" % test
+        #check if this test is a valid move.
         if(noConflictCheck(board,test,row,col)):
             if verbose==1:
                 print "No conflict setting value. New Board:"
+            #Set new value
             board.set_value(row,col,test)
-            if verbose==1:
-                board.print_board()
             #if we are done, pass the true back through the recursion
             if (backtrack(board)):
                 return True
-            #else undo
-            if verbose==1:
-                print "No possibilities. Undoing"
-            board.set_value(row,col,0)
-            #print board
-            if verbose==1:
-                board.print_board()
-            
+            #else undo the move and keep trying
+            board.set_value(row,col,0)     
     #if nothing else is found go back and change the most recent value
     return False
 
 
-def forwardcheck(board, row, col):
+def back_forward(board, domain):
+    """Recursive implementation to solve a Sudoku board. Implements
+       forward checking into backtracking algorithm"""
+    
+    arr=getNextOpen(board)    
+    row=arr[0]
+    col=arr[1]
+    if (row==-1):
+        #no Open Spots were found. All spots are filled so we are done
+        return True
+    
+    BoardArray = board.CurrentGameBoard
+    size = len(BoardArray)
+    
+    #Check each open value
+    for test in range (1, size+1):
+        #check if this test is a valid move.
+        if(noConflictCheck(board,test,row,col)):
+            #Set new value
+            domain_test = domain
+            board.set_value(row,col,test)
+            #Assess its domain and check for empty domains
+            if forwardcheck(board, domain_test, row, col):
+                if back_forward(board, domain_test):
+                    return True
+            #else undo the move and keep trying
+            board.set_value(row,col,0)         
+    #if nothing else is found go back and change the most recent value
+    return False
+
+
+def forwardcheck(board, domain, row, col):
     """After each new value is assigned, delete all conflicting values from other squares' domains"""
     #Remove new value from conflicting squares
     BoardArray = board.CurrentGameBoard
-    domain = board.Domain
     val = BoardArray[row][col]
     size = len(BoardArray)
     subsquare = int(math.sqrt(size))
@@ -227,6 +256,12 @@ def forwardcheck(board, row, col):
                 and (SquareRow*subsquare + i != row)
                 and (SquareCol*subsquare + j != col)):
                     (domain[SquareRow*subsquare+i][SquareCol*subsquare+j]).remove(val)
+
+    #Check for empty domains
+    if domain.count([])!=0:
+        return False
+    return True                
+
 
 
 def getNextOpen(board):
