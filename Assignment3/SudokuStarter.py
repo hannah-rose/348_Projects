@@ -165,7 +165,7 @@ def solve(initial_board, forward_checking = False, MRV = False, MCV = False,
 
     #Call backtrack with the required constraints
     if forward_checking:
-        back_forward(initial_board, initial_board.Domain)
+        back_forward(initial_board, initial_board.Domain,MRV,MCV,LCV)
     else:
         backtrack(initial_board)
     return initial_board
@@ -206,10 +206,16 @@ def backtrack(board):
     return False
 
 
-def back_forward(board, domain):
+def back_forward(board, domain,MRV,MCV,LCV):
     """Recursive implementation to solve a Sudoku board. Implements
        forward checking into backtracking algorithm"""
-    arr=getNextOpen(board)    
+    
+    if (MRV==True):
+        arr=getMRV(board)
+    elif (MCV==True):
+        arr=getMCV(board)
+    else:
+        arr=getNextOpen(board)    
     row=arr[0]
     col=arr[1]
     if (row==-1):
@@ -230,7 +236,7 @@ def back_forward(board, domain):
             board.set_value(row,col,test)
             #Assess its domain and check for empty domains
             if forwardcheck(board, domain_test, row, col):
-                if back_forward(board, domain_test):
+                if back_forward(board, domain_test,MRV,MCV,LCV):
                     return True
             #else undo the move and keep trying
             board.set_value(row,col,0)         
@@ -312,6 +318,21 @@ def getNextOpen(board):
     #else return false, so we are done
     return [-1,-1]
     
+def getMRV(board):
+    minDomain=999
+    minRow=-1
+    minCol=-1    
+    for i in range (0,board.BoardSize):
+        for j in range (0,board.BoardSize):
+            if board.CurrentGameBoard[i][j]==0:
+                testDomain=len(board.Domain[i][j])
+                if testDomain<minDomain:
+                    minDomain=testDomain
+                    minRow=i
+                    minCol=j
+    return [minRow,minCol]
+
+            
 
 def noConflictCheck(board,num,row,col):
     """Shortened version of is_complete. Only checks the row, col and subsquare
