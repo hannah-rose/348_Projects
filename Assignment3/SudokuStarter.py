@@ -226,7 +226,11 @@ def back_forward(board, domain,MRV,MCV,LCV):
     size = len(BoardArray)
     
     dom=domain[row][col]
-    #Check each open value
+    #If LCV, sort domain of variable
+    if (LCV==True):
+        dom = getLCV(board,row,col)
+    print dom
+    #Check each value in domain
     for test in dom:
         board.count+=1
         #check if this test is a valid move.
@@ -296,11 +300,8 @@ def getLCV(board, row, col):
         board_test.CurrentGameBoard[row][col] = val
         board_test.LCV_count = 0
         forwardcheck(board_test,domain_test,row,col)
-        print val
-        print board_test.LCV_count
         #Add LCV_count to dictionary
         dom_dict[val]=board_test.LCV_count
-        print dom_dict
         #reset domain to try again for next test
         domain_test = board.Domain
         
