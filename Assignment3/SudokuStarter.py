@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 import struct, string, math
+from copy import *
 
 
+count=0
 verbose=0
 
 class SudokuBoard:
@@ -12,6 +14,7 @@ class SudokuBoard:
       self.BoardSize = size #the size of the board
       self.CurrentGameBoard= board #the current state of the game board
       self.Domain = domain #the set of possible values for each cell
+      self.count=0
 
 
     def set_value(self, row, col, value):
@@ -171,7 +174,6 @@ def backtrack(board):
     """Recursive implementation to solve a Sudoku board. Uses brute force to
     check all possible solutions. If it cannot find one, it backtracks and undos
     one of its guesses and continues."""
-    
     arr=getNextOpen(board)    
     row=arr[0]
     col=arr[1]
@@ -186,6 +188,8 @@ def backtrack(board):
     
     #we will check if any of these values work
     for test in range (1, size+1):
+        board.count+=1
+
         #check if this test is a valid move.
         if(noConflictCheck(board,test,row,col)):
             if verbose==1:
@@ -204,7 +208,6 @@ def backtrack(board):
 def back_forward(board, domain):
     """Recursive implementation to solve a Sudoku board. Implements
        forward checking into backtracking algorithm"""
-    
     arr=getNextOpen(board)    
     row=arr[0]
     col=arr[1]
@@ -215,12 +218,14 @@ def back_forward(board, domain):
     BoardArray = board.CurrentGameBoard
     size = len(BoardArray)
     
+    dom=domain[row][col]
     #Check each open value
-    for test in range (1, size+1):
+    for test in dom:
+        board.count+=1
         #check if this test is a valid move.
         if(noConflictCheck(board,test,row,col)):
             #Set new value
-            domain_test = domain
+            domain_test = deepcopy(domain)
             board.set_value(row,col,test)
             #Assess its domain and check for empty domains
             if forwardcheck(board, domain_test, row, col):
