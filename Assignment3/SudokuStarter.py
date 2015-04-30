@@ -279,30 +279,35 @@ def forwardcheck(board, domain, row, col):
 
 
 def getLCV(board, row, col):
-    """Returns the least contrained value, leaving the largest number of options
-       in the domain of other empty sqares"""
-    #Start with default high value of eliminations
-    elims = 999999
+    """Finds the least contrained value, leaving the largest number of options
+       in the domain of other empty sqares. Returns the domain of a variable, sorted
+       so that the LCV will be tried first"""
     #Get list of possible values
     board_test = deepcopy(board)
     domain_test = board_test.Domain
     dom = domain_test[row][col]
-    #See which value returns the smallest number of changes
-    for val in dom:
+
+    #turn the domain into an empty dictionary
+    dom_dict = {x: 0 for x in dom}
+
+    #Attach number of changes to each possible value
+    for val in dom_dict:
         #set test value and forward check it
         board_test.CurrentGameBoard[row][col] = val
         board_test.LCV_count = 0
         forwardcheck(board_test,domain_test,row,col)
         print val
         print board_test.LCV_count
-        #check if this value had less changes
-        if board_test.LCV_count<elims:
-            choice = val
-            elims = board_test.LCV_count
-        #reset domain to try again
+        #Add LCV_count to dictionary
+        dom_dict[val]=board_test.LCV_count
+        print dom_dict
+        #reset domain to try again for next test
         domain_test = board.Domain
-    #return the best value
-    return choice
+        
+    #sort dictionary by LCV_counts and return the sorted domain
+    dom_sort = sorted(dom_dict, key=dom_dict.__getitem__)
+    print dom_sort 
+    return dom_sort
             
 
 
