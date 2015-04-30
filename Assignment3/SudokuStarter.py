@@ -21,7 +21,7 @@ class SudokuBoard:
         #add the value to the appropriate position on the board
         self.CurrentGameBoard[row][col]=value
         #return a new board of the same size with the value added
-        return SudokuBoard(self.BoardSize, self.CurrentGameBoard)
+        return SudokuBoard(self.BoardSize, self.CurrentGameBoard, self.Domain)
                                                                   
                                                                   
     def print_board(self):
@@ -59,6 +59,7 @@ class SudokuBoard:
             else:
                 print sep
 
+
 def parse_file(filename):
     """Parses a sudoku text file into a BoardSize, and a 2d array which holds
     the value of each cell. Array elements holding a 0 are considered to be
@@ -82,6 +83,7 @@ def parse_file(filename):
     
     return board
     
+
 def is_complete(sudoku_board):
     """Takes in a sudoku board and tests to see if it has been filled in
     correctly."""
@@ -112,22 +114,37 @@ def is_complete(sudoku_board):
                             return False
     return True
 
+
 def init_board(file_name):
     """Creates a SudokuBoard object initialized with values from a text file"""
     board = parse_file(file_name)
-    domain = set_domain(board,len(board))
+    domain = create_domain(board,len(board))
     return SudokuBoard(len(board), board, domain)
 
 
-def set_domain(board,size):
-        """Initializes domain of all possibilities for each cell"""
-        #Initialize blank domain
-        domain = [ [ [ 0 for i in range(size) ] for j in range(size) ] for k in range(size) ]
-        for row in range(size):
-            for col in range(size):
-                for val in range(size):
-                    domain[row][col][val] = val+1;
-        return domain;
+def create_domain(board,size):
+    """Initializes domain of all possibilities for each cell"""
+    #Initialize blank domain
+    domain = [ [ 0 for i in range(size) ] for j in range(size) ]
+    #Fill in with every possible option
+    for row in range(size):
+        for col in range(size):
+            domain[row][col] = list(range(1,size+1))
+    return domain
+
+
+def init_domain(board,size):
+    """Uses forward checking to remove conflicts from initial puzzle"""
+    domain = board.Domain
+    BoardArray = board.CurrentGameBoard
+    #Update conflicts based on items already in the sudoku
+    for row in range(size):
+        for col in range(size):
+            if (BoardArray[row][col])!=0:
+                domain[row][col] = [ BoardArray[row][col] ]
+                forwardcheck(board,row,col)
+    return domain
+
 
 
 def solve(initial_board, forward_checking = False, MRV = False, MCV = False,
@@ -186,13 +203,30 @@ def backtrack(board):
 
 
 def forwardcheck(board, row, col):
-    """Forwardchecking subroutine. Every square begins with a domain of all
-    possible values. After each new value is assigned,
-    delete all conflicting values from other square's domains"""
-    #If there is a value, remove domain conflicts
-    if board.CurrentGameBoard[row][col]!=0:
-        print "Value here"
+    """After each new value is assigned, delete all conflicting values from other squares' domains"""
+    #Remove new value from conflicting squares
+    BoardArray = board.CurrentGameBoard
+    domain = board.Domain
+    val = BoardArray[row][col]
+    size = len(BoardArray)
+    subsquare = int(math.sqrt(size))
+    
+    #Check rows and columns for conflicts
+    for i in range(size):
+        if ((domain[row][i].count(val)!=0) and i != col):
+            (domain[row][i]).remove(val)
+        if ((domain[i][col].count(val)!=0) and i != row):
+            (domain[i][col]).remove(val)
 
+    #determine which square the cell is in and remove conflicts
+    SquareRow = row // subsquare
+    SquareCol = col // subsquare
+    for i in range(subsquare):
+        for j in range(subsquare):
+            if((domain[SquareRow*subsquare+i][SquareCol*subsquare+j]).count(val)!=0
+                and (SquareRow*subsquare + i != row)
+                and (SquareCol*subsquare + j != col)):
+                    (domain[SquareRow*subsquare+i][SquareCol*subsquare+j]).remove(val)
 
 
 def getNextOpen(board):
@@ -207,6 +241,7 @@ def getNextOpen(board):
     #else return false, so we are done
     return [-1,-1]
     
+
 def noConflictCheck(board,num,row,col):
     """Shortened version of is_complete. Only checks the row, col and subsquare
     that we are checking. """
