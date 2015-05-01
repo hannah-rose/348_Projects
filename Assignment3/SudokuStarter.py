@@ -227,21 +227,18 @@ def back_forward(board, domain,MRV,MCV,LCV):
     
     #If LCV, sort domain of variable
     if (LCV==True):
-        dom = getLCV(board,domain,row,col)
+        domain_test = deepcopy(domain)
+        dom = getLCV(board,domain_test,row,col)
     else:
         dom=domain[row][col]
-    print dom
     #Check each value in domain
     for test in dom:
-        print test
         board.count+=1
         #check if this test is a valid move.
         if(noConflictCheck(board,test,row,col)):
             #Set new value
             domain_test = deepcopy(domain)
-            print domain_test
             board.set_value(row,col,test)
-            board.print_board()
             #Assess its domain and check for empty domains
             if forwardcheck(board, domain_test, row, col):
                 if back_forward(board, domain_test,MRV,MCV,LCV):
@@ -330,6 +327,8 @@ def getNextOpen(board):
     
 
 def getMRV(board):
+    """Minimum Remaining Values: Chooses the variable with the
+       fewest values left"""
     minDomain=999
     minRow=-1
     minCol=-1    
@@ -344,16 +343,18 @@ def getMRV(board):
     return [minRow,minCol]
 
 
-def getMLV(board):
+def getMCV(board):
+    """Most Constrained Variable: Chooses the variable that is involved in the 
+       largest number of constraints with other unassigned variables"""
     maxConstraints = -1
     minRow=-1
     minCol=-1
+    count = 0
     
     for i in range (0,board.BoardSize):
         for j in range (0,board.BoardSize):
             if (board.CurrentGameBoard == 0):
                 count = 0
-
                 #Check rows and columns for conflicts
                 for i in range(size):
 
