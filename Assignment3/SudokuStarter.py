@@ -218,12 +218,12 @@ def back_forward(board, domain,MRV,MCV,LCV):
         arr=getNextOpen(board)    
     row=arr[0]
     col=arr[1]
+    #print col,row
     if (row==-1):
         #no Open Spots were found. All spots are filled so we are done
         return True
     
     BoardArray = board.CurrentGameBoard
-    size = len(BoardArray)
     
     #If LCV, sort domain of variable
     if (LCV==True):
@@ -350,18 +350,21 @@ def getMCV(board):
     minRow=-1
     minCol=-1
     mcv_count = 0
+    size = len(board.CurrentGameBoard)
+    subsquare = int(math.sqrt(size))
+    board.print_board()
+    ##test = [ [ 0 for i in range(size) ] for j in range(size) ]
 
-    for i in range(0,board.BoardSize):
-        for j in range(0,board.BoardSize):
-            if (board.CurrentGameBoard[i][j] == 0):
-                mcv_count = 0
+    for row in range(0,board.BoardSize):
+        for col in range(0,board.BoardSize):
+            mcv_count = 0            
+            if (board.CurrentGameBoard[row][col] == 0):
+                
                 #Check rows and columns for conflicts
                 for i in range(board.BoardSize):
-
-                    if ((board.CurrentGameBoard[row][i]==0) and i != col):
+                    if ((board.CurrentGameBoard[row][i]==0) and i != col and i//subsquare!=subsquare):
                         mcv_count += 1
-
-                    if ((board.CurrentGameBoard[i][col]==0) and i != row):
+                    if ((board.CurrentGameBoard[i][col]==0) and i != row and i//size!=subsquare):
                         mcv_count += 1
 
                 #determine which square the cell is in and remove conflicts
@@ -369,14 +372,16 @@ def getMCV(board):
                 SquareCol = col // subsquare
                 for i in range(subsquare):
                     for j in range(subsquare):
-                        if((board.CurrentGameBoard[SquareRow*subsquare+i][SquareCol*subsquare+j]).count(val)==0
+                        if((board.CurrentGameBoard[SquareRow*subsquare+i][SquareCol*subsquare+j])==0
                             and (SquareRow*subsquare + i != row)
                             and (SquareCol*subsquare + j != col)):
                                 mcv_count += 1  
-            if maxConstraints > mcv_count:
-                mcv_count = maxConstraints
-                minRow = i
-                minCol = j
+                if maxConstraints < mcv_count:
+                    maxConstraints = mcv_count
+                    minRow = row
+                    minCol = col
+                #test[row][col]=mcv_count
+    #print test
     return [minRow,minCol]                                     
 
             
