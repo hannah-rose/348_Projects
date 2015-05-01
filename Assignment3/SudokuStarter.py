@@ -1,13 +1,13 @@
 #!/usr/bin/env python
-import struct, string, math
+import struct, string, math, time
 from copy import *
 
 
-count=0
-verbose=0
-
 class SudokuBoard:
     """This will be the sudoku board game object your player will manipulate."""
+
+    count=0
+    verbose=0
   
     def __init__(self, size, board, domain):
       """the constructor for the SudokuBoard"""
@@ -349,20 +349,20 @@ def getMCV(board):
     maxConstraints = -1
     minRow=-1
     minCol=-1
-    count = 0
-    
-    for i in range (0,board.BoardSize):
-        for j in range (0,board.BoardSize):
-            if (board.CurrentGameBoard == 0):
-                count = 0
+    mcv_count = 0
+
+    for i in range(0,board.BoardSize):
+        for j in range(0,board.BoardSize):
+            if (board.CurrentGameBoard[i][j] == 0):
+                mcv_count = 0
                 #Check rows and columns for conflicts
-                for i in range(size):
+                for i in range(board.BoardSize):
 
                     if ((board.CurrentGameBoard[row][i]==0) and i != col):
-                        count += 1
+                        mcv_count += 1
 
                     if ((board.CurrentGameBoard[i][col]==0) and i != row):
-                        count += 1
+                        mcv_count += 1
 
                 #determine which square the cell is in and remove conflicts
                 SquareRow = row // subsquare
@@ -372,9 +372,9 @@ def getMCV(board):
                         if((board.CurrentGameBoard[SquareRow*subsquare+i][SquareCol*subsquare+j]).count(val)==0
                             and (SquareRow*subsquare + i != row)
                             and (SquareCol*subsquare + j != col)):
-                                count += 1  
-            if maxConstraints > count:
-                count = maxConstraints
+                                mcv_count += 1  
+            if maxConstraints > mcv_count:
+                mcv_count = maxConstraints
                 minRow = i
                 minCol = j
     return [minRow,minCol]                                     
