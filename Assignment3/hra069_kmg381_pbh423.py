@@ -1,4 +1,10 @@
-#!/usr/bin/env python
+# Sudoku Solver
+# Author(s) names AND netid's: 
+#   Hannah Arntson  hra069
+#   Katie George    kmg381
+#   Peter Haddad    pbh423
+# Date: 2nd May, 2015
+
 import struct, string, math, time
 from copy import *
 
@@ -367,7 +373,7 @@ def getMCV(board):
                     if ((board.CurrentGameBoard[i][col]==0) and i != row and i//size!=subsquare):
                         mcv_count += 1
 
-                #determine which square the cell is in and remove conflicts
+                #determine which square the cell is in and find conflicts
                 SquareRow = row // subsquare
                 SquareCol = col // subsquare
                 for i in range(subsquare):

@@ -5,7 +5,7 @@ Created on Mon Apr 27 12:13:10 2015
 @author: peter
 """
 
-from SudokuStarter import *
+from hra069_kmg381_pbh423 import *
 
 verbose=0
 
