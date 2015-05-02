@@ -22,6 +22,7 @@ class SudokuBoard:
       self.Domain = domain #the set of possible values for each cell
       self.count=0
       self.LCV_count=0
+      self.startTime=0.0
 
 
     def set_value(self, row, col, value):
@@ -166,8 +167,8 @@ def solve(initial_board, forward_checking = False, MRV = False, MCV = False,
        arguments). Returns the resulting board solution. """
     #Begin by initializing the domain
     init_domain(initial_board,initial_board.BoardSize)
-
-    print "Be patient! We're working on solving your puzzle..."
+    initial_board.startTime = time.time()
+    #print "Be patient! We're working on solving your puzzle..."
 
     #Call backtrack with the required constraints
     if forward_checking:
@@ -184,12 +185,13 @@ def backtrack(board):
     arr=getNextOpen(board)    
     row=arr[0]
     col=arr[1]
-    if verbose==1:
-        print "next open spot is %d, %d" % (row,col) 
+
     if (row==-1):
         #no Open Spots were found. All spots are filled so we are done
         return True
-    
+    if (board.startTime+600<time.time()):
+        print "TIME OUT"
+        return True
     BoardArray = board.CurrentGameBoard
     size = len(BoardArray)
     
@@ -199,8 +201,6 @@ def backtrack(board):
 
         #check if this test is a valid move.
         if(noConflictCheck(board,test,row,col)):
-            if verbose==1:
-                print "No conflict setting value. New Board:"
             #Set new value
             board.set_value(row,col,test)
             #if we are done, pass the true back through the recursion
@@ -224,6 +224,9 @@ def back_forward(board, domain,MRV,MCV,LCV):
         arr=getNextOpen(board)    
     row=arr[0]
     col=arr[1]
+    if (time.time()>board.startTime+600):
+        print "TIME OUT"
+        return True
     #print col,row
     if (row==-1):
         #no Open Spots were found. All spots are filled so we are done
@@ -358,7 +361,7 @@ def getMCV(board):
     mcv_count = 0
     size = len(board.CurrentGameBoard)
     subsquare = int(math.sqrt(size))
-    board.print_board()
+    #board.print_board()
     ##test = [ [ 0 for i in range(size) ] for j in range(size) ]
 
     for row in range(0,board.BoardSize):
