@@ -21,13 +21,41 @@ class Bayes_Classifier:
           self.badDict=self.load("badDict.pickle")
 
     def train(self):   
-      """Trains the Naive Bayes Sentiment Classifier."""
+       """Trains the Naive Bayes Sentiment Classifier."""
+       for files in os.walk("./movies_reviews"):
+          for fileNames in files[2]:                
+              if fileNames[7]=='1':
+                  currDict=self.badDict
+              else:
+                  currDict=self.goodDict
+              tokens=self.tokenize(self.loadFile("./movies_reviews/"+fileNames))
+              for token in tokens:
+                  if token in currDict:
+                      currDict[token]+=1
+                  else:
+                      currDict[token]=1
+       self.save(self.goodDict, "goodDict.pickle")
+       self.save(self.badDict, "badDict.pickle")
     
     def classify(self, sText):
-      """Given a target string sText, this function returns the most likely document
-      class to which the target string belongs (i.e., positive, negative or neutral).
-      """
-
+        """Given a target string sText, this function returns the most likely document
+        class to which the target string belongs (i.e., positive, negative or neutral).
+        """
+        numGood=sum(self.goodDict.itervalues())
+        numBad=sum(self.badDict.itervalues())
+        tokens=self.tokenize(sText)
+        goodProb=1.0
+        badProb=1.0
+        for token in tokens:
+            #good prob
+            if token in self.goodDict:
+                goodProb*= (self.goodDict[token]/float(numGood))
+            if token in self.badDict:
+                badProb*= (self.badDict[token]/float(numBad))
+        print goodProb
+        print badProb
+                
+      
     def loadFile(self, sFilename):
       """Given a file name, return the contents of the file as a string."""
 
@@ -74,19 +102,4 @@ class Bayes_Classifier:
 
       return lTokens
 
-    def train(self):
-        for files in os.walk("./movies_reviews"):
-            for fileNames in files[2]:                
-                if fileNames[7]=='1':
-                    currDict=self.badDict
-                else:
-                    currDict=self.goodDict
-                tokens=self.tokenize(self.loadFile("./movies_reviews/"+fileNames))
-                for token in tokens:
-                    if token in currDict:
-                        currDict[token]+=1
-                    else:
-                        currDict[token]=1
-        self.save(self.goodDict, "goodDict.pickle")
-        self.save(self.badDict, "badDict.pickle")
-            
+        
