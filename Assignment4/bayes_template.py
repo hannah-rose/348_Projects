@@ -9,12 +9,12 @@ import math, os, pickle, re
 class Bayes_Classifier:
     goodDict=dict()
     badDict=dict()
-    def __init__(self):
+    def __init__(self, train=0):
       """This method initializes and trains the Naive Bayes Sentiment Classifier.  If a 
       cache of a trained classifier has been stored, it loads this cache.  Otherwise, 
       the system will proceed through training.  After running this method, the classifier 
       is ready to classify input text."""
-      if (not os.path.isfile("goodDict.pickle") or not os.path.isfile("badDict.pickle")):
+      if (not os.path.isfile("goodDict.pickle") or not os.path.isfile("badDict.pickle") or train==1):
           self.train()
       else:
           self.goodDict=self.load("goodDict.pickle")
@@ -26,14 +26,22 @@ class Bayes_Classifier:
           for fileNames in files[2]:                
               if fileNames[7]=='1':
                   currDict=self.badDict
+                  otherDict=self.goodDict
               else:
                   currDict=self.goodDict
+                  otherDict=self.badDict
               tokens=self.tokenize(self.loadFile("./movies_reviews/"+fileNames))
               for token in tokens:
                   if token in currDict:
                       currDict[token]+=1
                   else:
                       currDict[token]=1
+                  if token not in otherDict:
+                      otherDict[token]=0
+       for key in self.goodDict:
+           self.goodDict[key]+=1
+       for key in self.badDict:
+           self.badDict[key]+=1
        self.save(self.goodDict, "goodDict.pickle")
        self.save(self.badDict, "badDict.pickle")
     
