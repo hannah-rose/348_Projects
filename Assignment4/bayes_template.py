@@ -45,23 +45,55 @@ class Bayes_Classifier:
        self.save(self.goodDict, "goodDict.pickle")
        self.save(self.badDict, "badDict.pickle")
     
-    def classify(self, sText):
+    def classify(self, sText, verbose=0):
         """Given a target string sText, this function returns the most likely document
         class to which the target string belongs (i.e., positive, negative or neutral).
         """
+        #defines if we use logs or normals
+        log=1
         numGood=sum(self.goodDict.itervalues())
         numBad=sum(self.badDict.itervalues())
         tokens=self.tokenize(sText)
-        goodProb=1.0
-        badProb=1.0
+        if log:
+            goodProb=0
+            badProb=0
+        else:
+            goodProb=1.0
+            badProb=1.0
         for token in tokens:
-            #good prob
-            if token in self.goodDict:
-                goodProb*= (self.goodDict[token]/float(numGood))
-            if token in self.badDict:
-                badProb*= (self.badDict[token]/float(numBad))
-        print goodProb
-        print badProb
+            if log:
+                if token in self.goodDict:
+                    goodProb+= math.log(self.goodDict[token]/float(numGood))
+                if token in self.badDict:
+                    badProb+= math.log(self.badDict[token]/float(numBad))
+            else:
+                if token in self.goodDict:
+                    goodProb*= (self.goodDict[token]/float(numGood))
+                if token in self.badDict:
+                    badProb*= (self.badDict[token]/float(numBad))
+        if verbose:
+            print goodProb
+            print badProb
+        
+        if log:
+            diff=goodProb-badProb           
+            avg= (goodProb+badProb)/2
+            if verbose:            
+                print "diff:",diff             
+                print "avg:",avg
+            if diff>abs(avg/10) or diff > 5:
+                return "positive"
+            elif diff<(avg/10) or diff < -5:
+                return 'negative'
+            else:
+                return 'neutral'
+        else:
+            if 10*goodProb>badProb:
+                return "positive"
+            elif 10*badProb>goodProb:
+                return "negative"
+            else:
+                return "neutral"
                 
       
     def loadFile(self, sFilename):

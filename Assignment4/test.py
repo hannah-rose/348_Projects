@@ -6,6 +6,8 @@ Created on Tue May 12 16:04:49 2015
 """
 from bayes_template import *
 
-b=Bayes_Classifier()
-b.classify("good awsome amazing")
-b.classify("bad horrible aweful")
+b=Bayes_Classifier(0)
+b.tokenize("test 1 2 . ? the ")
+print b.classify("good awsome amazing")
+print b.classify("bad horrible aweful")
+print b.classify("the movie was ok")
