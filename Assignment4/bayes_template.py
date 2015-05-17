@@ -121,24 +121,44 @@ class Bayes_Classifier:
       f.close()
       return dObj
 
-    def tokenize(self, sText): 
+    def tokenize(self, sText, bi=0): 
       """Given a string of text sText, returns a list of the individual tokens that 
       occur in that string (in order)."""
-
-      lTokens = []
-      sToken = ""
-      for c in sText:
-         if re.match("[a-zA-Z0-9]", str(c)) != None or c == "\"" or c == "_" or c == "-":
-            sToken += c
-         else:
-            if sToken != "":
-               lTokens.append(sToken)
-               sToken = ""
-            if c.strip() != "":
-               lTokens.append(str(c.strip()))
-               
-      if sToken != "":
-         lTokens.append(sToken)
+      #include two word strings
+      if (bi):
+          lTokens = []
+          last = ""
+          sToken = ""
+          for c in sText:
+             if re.match("[a-zA-Z0-9]", str(c)) != None or c == "\"" or c == "_" or c == "-":
+                sToken += c
+             else:
+                if sToken != "":
+                    if last!= "":                    
+                        lTokens.append(last+" "+sToken)                    
+                    last=sToken
+                    lTokens.append(sToken)
+                    sToken = ""
+                if c.strip() != "":
+                   lTokens.append(str(c.strip()))
+                   
+          if sToken != "":
+             lTokens.append(sToken)
+      else:
+         lTokens = []
+         sToken = ""
+         for c in sText:
+            if re.match("[a-zA-Z0-9]", str(c)) != None or c == "\"" or c == "_" or c == "-":
+               sToken += c
+            else:
+               if sToken != "":
+                  lTokens.append(sToken)
+                  sToken = ""
+               if c.strip() != "":
+                  lTokens.append(str(c.strip()))
+                 
+         if sToken != "":
+              lTokens.append(sToken)
 
       return lTokens
 
