@@ -44,6 +44,8 @@ class Bayes_Classifier:
            self.badDict[key]+=1
        self.save(self.goodDict, "goodDict.pickle")
        self.save(self.badDict, "badDict.pickle")
+       
+    
     
     def classify(self, sText, verbose=0):
         """Given a target string sText, this function returns the most likely document
@@ -121,7 +123,7 @@ class Bayes_Classifier:
       f.close()
       return dObj
 
-    def tokenize(self, sText, bi=0): 
+    def tokenize(self, sText, bi=1): 
       """Given a string of text sText, returns a list of the individual tokens that 
       occur in that string (in order)."""
       #include two word strings
@@ -162,4 +164,66 @@ class Bayes_Classifier:
 
       return lTokens
 
-        
+    def validate(self, folds=10):
+        for stuff in os.walk("./movies_reviews"):
+            files=stuff[2]
+            numFiles=len(files)
+            foldSize=numFiles/folds
+            groups=[]
+            for i in range(folds):
+                groups.append(files[i*foldSize:(i+1)*foldSize])
+            trainGroups=[None]*10
+            for i in range(folds):
+                 trainGroups[i]=[]
+                 for exclusion in range(folds):
+                     if exclusion!=i:
+                         trainGroups[i]+=groups[exclusion]
+            for i in range(folds):
+                self.trainFileName(trainGroups[i])
+                results=self.classifyBatch(groups[i])
+                print "Correct:",results[0],". Wrong:",results[1]
+                
+
+
+    def trainFileName(self, files):
+        for fileNames in files:                
+          if fileNames[7]=='1':
+              currDict=self.badDict
+              otherDict=self.goodDict
+          else:
+              currDict=self.goodDict
+              otherDict=self.badDict
+          tokens=self.tokenize(self.loadFile("./movies_reviews/"+fileNames))
+          for token in tokens:
+              if token in currDict:
+                  currDict[token]+=1
+              else:
+                  currDict[token]=1
+              if token not in otherDict:
+                  otherDict[token]=0
+        for key in self.goodDict:
+           self.goodDict[key]+=1
+        for key in self.badDict:
+           self.badDict[key]+=1       
+            
+    def classifyBatch(self, files):
+        wrong=0
+        correct=0
+        for fileName in files:
+            result=self.classify(self.loadFile("./movies_reviews/"+fileName))
+            if fileName[7]=='1':
+                if result=="positive":
+                    wrong+=1
+                elif result=="negative":
+                    correct+=1
+            else:
+                if result=="positive":
+                    correct+=1
+                elif result=="negative":
+                    wrong+=1
+        return [correct, wrong]
+                
+                
+                
+                
+                
