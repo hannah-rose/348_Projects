@@ -534,7 +534,24 @@ class Stroke:
             prev = p
         return ret
 
-
+    def boundingBoxArea(self):
+        """returns the area of the bounding box"""
+        minX=99999
+        maxX=-1
+        minY=99999
+        maxY=-1
+        for p in self.points:
+            if p[0]<minX:
+                minX=p[0]
+            if p[0]>maxX:
+                maxX=p[0]
+            if p[1]<minY:
+                minY=p[1]
+            if p[1]>maxY:
+                maxY=p[1]
+        dX=maxX-minX
+        dY=maxY-minY
+        return dX*dY
 
     def sumOfCurvature(self, func=lambda x: x, skip=1):
         ''' Return the normalized sum of curvature for a stroke.
