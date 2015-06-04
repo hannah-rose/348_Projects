@@ -128,9 +128,45 @@ class HMM:
     def label( self, data ):
         ''' Find the most likely labels for the sequence of data
             This is an implementation of the Viterbi algorithm  '''
-        # You will implement this function
-        print "label function not yet implemented"
-        return None
+        # Get number of timesteps and number of states
+        n_steps = len(data)
+        n_states = len(self.states)
+
+        # Initialize trellis to be an empty dictionary
+        trellis = {};
+        # Add states and their prior probabilities to the trellis
+        for state in self.states:
+            prob = self.priors[state] * self.emissions[state][self.featureNames[0]][data[0][self.featureNames[0]]]
+            trellis[state] = ([state], prob)
+        
+        # Loop through observation timesteps
+        for t in range(1,n_steps):
+            #for feature in self.features
+            temp = {}
+            # Now check possible next states
+            for next_state in self.states:
+                max_path = []     # Find the prior best path to that state
+                max_prob = 0        # Find its partial probability
+                # Check each state
+                for state in self.states:
+                    # Get path and priors from the trellis
+                    path, prob = copy.deepcopy(trellis[state])
+                    transitions = copy.deepcopy(self.transitions)
+                    emissions = copy.deepcopy(self.emissions)
+                    features = copy.deepcopy(self.featureNames)
+
+                    # Partial probability at that state
+                    partial = prob * transitions[next_state][state] * emissions[next_state][features[0]][data[t][features[0]]]
+
+                    if partial > max_prob:
+                        max_prob = partial
+                        max_path = path
+                        max_path.append(next_state)
+                temp[next_state] = (max_path, max_prob)
+                #print temp[next_state]
+            trellis = temp
+        
+        return max_path
     
     def getEmissionProb( self, state, features ):
         ''' Get P(features|state).
