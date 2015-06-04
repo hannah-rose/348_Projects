@@ -1,8 +1,9 @@
-# Name: 
-# Date:
-# Description:
-#
-#
+# Bayes_Classifier
+# Author(s) names AND netid's: 
+#   Hannah Arntson  hra069
+#   Katie George    kmg381
+#   Peter Haddad    pbh423
+# Date: 2nd May, 2015
 
 import math, os, pickle, re
 
@@ -76,26 +77,30 @@ class Bayes_Classifier:
         if verbose:
             print goodProb
             print badProb
-        
-        if log:
-            diff=goodProb-badProb           
-            avg= (goodProb+badProb)/2
-            if verbose:            
-                print "diff:",diff             
-                print "avg:",avg
-            if diff>abs(avg/10) or diff > 5:
-                return "positive"
-            elif diff<(avg/10) or diff < -5:
-                return 'negative'
-            else:
-                return 'neutral'
-        else:
-            if 10*goodProb>badProb:
-                return "positive"
-            elif 10*badProb>goodProb:
-                return "negative"
-            else:
-                return "neutral"
+        # different types of classification. For evaluation we are not including negatives
+        if goodProb>badProb:
+            return "positive"
+        elif badProb>=goodProb:
+            return "negative"
+#        if log:
+#            diff=goodProb-badProb           
+#            avg= (goodProb+badProb)/2
+#            if verbose:            
+#                print "diff:",diff             
+#                print "avg:",avg
+#            if diff>abs(avg/10) or diff > 2:
+#                return "positive"
+#            elif diff<(avg/10) or diff < -2:
+#                return 'negative'
+#            else:
+#                return 'neutral'
+#        else:
+#            if 10*goodProb>badProb:
+#                return "positive"
+#            elif 10*badProb>goodProb:
+#                return "negative"
+#            else:
+#                return "neutral"
                 
       
     def loadFile(self, sFilename):
@@ -123,9 +128,10 @@ class Bayes_Classifier:
       f.close()
       return dObj
 
-    def tokenize(self, sText, bi=1): 
+    def tokenize(self, sText, bi=0): 
       """Given a string of text sText, returns a list of the individual tokens that 
-      occur in that string (in order)."""
+      occur in that string (in order).
+      Has been edited so it can include bigrams, which are inabled by the input."""
       #include two word strings
       if (bi):
           lTokens = []
@@ -165,6 +171,9 @@ class Bayes_Classifier:
       return lTokens
 
     def validate(self, folds=10):
+        """uses N fold clasification to validate the results.
+        Splits the data into N groups. The trains on all but one group
+        Then tests on the excludeed group"""
         for stuff in os.walk("./movies_reviews"):
             files=stuff[2]
             numFiles=len(files)
@@ -178,14 +187,43 @@ class Bayes_Classifier:
                  for exclusion in range(folds):
                      if exclusion!=i:
                          trainGroups[i]+=groups[exclusion]
+            precision=[None]*folds
+            recall=[None]*folds
+            accuracy=[None]*folds
+            fmeasure=[None]*folds
+            
             for i in range(folds):
+                self.goodDict.clear()
+                self.badDict.clear()
                 self.trainFileName(trainGroups[i])
-                results=self.classifyBatch(groups[i])
-                print "Correct:",results[0],". Wrong:",results[1]
+                results = self.classifyBatch(groups[i])
+                for x in results:
+                    print x
+                trueNeg = float(results[0])
+                wrongNeg = float(results[1])
+                truePos = float(results[2])
+                falsePos = float(results[3])
+                positive = float(results[4])
+                total = float(results[6])
+                precision[i] = truePos/(truePos+falsePos)
+                print "precision:",precision[i]
+                recall[i] = float(truePos/(truePos+wrongNeg))
+                print "recall:",recall[i]                
+                accuracy[i] = float((truePos+trueNeg)/(total))
+                print "accuracy",accuracy[i]
+                fmeasure[i] = float(2*truePos/(2*truePos+falsePos+wrongNeg))
+                print "fmeasure",fmeasure[i]
                 
-
-
+            print "Final accuracies"
+            print "Precision:",avg(precision)
+            print "Recall:", avg(recall)
+            print "Accuracy:",avg(accuracy)
+            print "Fmeasure",avg(fmeasure)
+                
+                
+                
     def trainFileName(self, files):
+        """Alternative training method that takes a list of filenames and then trains on them. Made so we can exclude a test set easily"""
         for fileNames in files:                
           if fileNames[7]=='1':
               currDict=self.badDict
@@ -207,23 +245,34 @@ class Bayes_Classifier:
            self.badDict[key]+=1       
             
     def classifyBatch(self, files):
-        wrong=0
-        correct=0
+        """Calls classify on on files in the list files. Tallys up the results"""
+        positive = 0
+        negative = 0        
+        wrongPos=0
+        correctPos=0
+        wrongNeg=0
+        correctNeg=0
+        total = 0
         for fileName in files:
             result=self.classify(self.loadFile("./movies_reviews/"+fileName))
+            total+=1            
             if fileName[7]=='1':
+                negative+=1
                 if result=="positive":
-                    wrong+=1
+                    wrongNeg+=1
                 elif result=="negative":
-                    correct+=1
+                    correctNeg+=1
             else:
+                positive+=1
                 if result=="positive":
-                    correct+=1
+                    correctPos+=1
                 elif result=="negative":
-                    wrong+=1
-        return [correct, wrong]
+                    wrongPos+=1
+        return [correctNeg, wrongNeg, correctPos, wrongPos,positive,negative,total]
                 
                 
                 
-                
+def avg(l):
+    """Average of a list"""
+    return sum(l)/float(len(l))
                 
