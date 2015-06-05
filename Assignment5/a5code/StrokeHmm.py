@@ -231,9 +231,9 @@ class StrokeLabeler:
         #    name to whether it is continuous or discrete
         # numFVals is a dictionary specifying the number of legal values for
         #    each discrete feature
-        self.featureNames = ['length']
-        self.contOrDisc = {'length': DISCRETE}
-        self.numFVals = { 'length': 2}
+        self.featureNames = ['length', 'area']
+        self.contOrDisc = {'length': DISCRETE, 'area': DISCRETE}
+        self.numFVals = { 'length': 2, 'area': 2}
 
     def featurefy( self, strokes ):
         ''' Converts the list of strokes into a list of feature dictionaries
@@ -265,7 +265,11 @@ class StrokeLabeler:
                 d['length'] = 0
             else:
                 d['length'] = 1
-
+            a = s.boundingBoxArea()
+            if a< 1000:
+                d['area'] = 0
+            else:
+                d['area'] = 1
             # We can add more features here just by adding them to the dictionary
             # d as we did with length.  Remember that when you add features,
             # you also need to add them to the three member data structures
