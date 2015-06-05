@@ -231,9 +231,9 @@ class StrokeLabeler:
         #    name to whether it is continuous or discrete
         # numFVals is a dictionary specifying the number of legal values for
         #    each discrete feature
-        self.featureNames = ['length', 'area']
-        self.contOrDisc = {'length': DISCRETE, 'area': DISCRETE}
-        self.numFVals = { 'length': 2, 'area': 2}
+        self.featureNames = ['length', 'area', 'curve', 'height2width']
+        self.contOrDisc = {'length': DISCRETE, 'area': DISCRETE, 'curve': DISCRETE, 'height2width': DISCRETE}
+        self.numFVals = { 'length': 2, 'area': 2, 'curve': 2, 'height2width': 2}
 
     def featurefy( self, strokes ):
         ''' Converts the list of strokes into a list of feature dictionaries
@@ -270,6 +270,16 @@ class StrokeLabeler:
                 d['area'] = 0
             else:
                 d['area'] = 1
+            c = s.sumOfCurvature()
+            if c < -0.0284:
+                d['curve'] = 0
+            else:
+                d['curve'] = 1
+            hw = s.boundingBoxHeightWidthRatio()
+            if hw < 1:
+                d['height2width'] = 0
+            else:
+                d['height2width'] = 1
             # We can add more features here just by adding them to the dictionary
             # d as we did with length.  Remember that when you add features,
             # you also need to add them to the three member data structures
@@ -566,7 +576,8 @@ class StrokeLabeler:
             allLabels.extend(labels)
         
         return allLabels,myLabels
-        
+    
+
     def featureBatch(self, trainingDir):
         for fFileObj in os.walk(trainingDir):
             lFileList = fFileObj[2]
@@ -582,11 +593,11 @@ class StrokeLabeler:
         for f in tFiles:
             strokes, labels = self.loadLabeledFile( f )
             for strokeNum in range(len(strokes)):
-                area=strokes[strokeNum].boundingBoxArea()
+                ratio=strokes[strokeNum].boundingBoxHeightWidthRatio()
                 if labels[strokeNum]=='text':
-                    text.append(area)
+                    text.append(ratio)
                 else:
-                    draw.append(area)
+                    draw.append(ratio)
         return text,draw
 
         
@@ -642,6 +653,7 @@ class Stroke:
         dX=maxX-minX
         dY=maxY-minY
         return dX*dY
+
         
     def boundingBoxHeightWidthRatio(self):
         minX=99999
@@ -658,8 +670,12 @@ class Stroke:
             if p[1]>maxY:
                 maxY=p[1]
         dX=maxX-minX
+        if dX==0:
+            dX=1
         dY=maxY-minY
-        return dY/dX
+        if dY==0:
+            dY=1
+        return float(dY/dX)
 
     def sumOfCurvature(self, func=lambda x: x, skip=1):
         ''' Return the normalized sum of curvature for a stroke.
