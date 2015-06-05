@@ -134,9 +134,17 @@ class HMM:
 
         # Initialize trellis to be an empty dictionary
         trellis = {};
+
         # Add states and their prior probabilities to the trellis
         for state in self.states:
-            prob = self.priors[state] * self.emissions[state][self.featureNames[0]][data[0][self.featureNames[0]]]
+            #Calculate probability of the observed evidence, given each initial state
+            init_evidence = 1;
+            for feature in self.featureNames:
+                # Multiply the probability of that feature occuring times the probability
+                # of the rest of the evidence observed at the given time step
+                init_evidence = init_evidence * self.emissions[state][feature][data[0][feature]]
+            prob = self.priors[state] * init_evidence
+            #print state+": "+str(prob)
             trellis[state] = ([state], prob)
         
         # Loop through observation timesteps
@@ -151,12 +159,19 @@ class HMM:
                 for state in self.states:
                     # Get path and priors from the trellis
                     path, prob = copy.deepcopy(trellis[state])
-                    transitions = copy.deepcopy(self.transitions)
-                    emissions = copy.deepcopy(self.emissions)
-                    features = copy.deepcopy(self.featureNames)
+                    transitions = self.transitions
+                    emissions = self.emissions
+                    features = self.featureNames
+
+                    #Calculate probability of the observed evidence, given the state
+                    evidence = 1;
+                    for feature in features:
+                        # Multiply the probability of that feature occuring times the probability
+                        # of the rest of the evidence observed at the given time step
+                        evidence = evidence * emissions[next_state][feature][data[t][feature]]
 
                     # Partial probability at that state
-                    partial = prob * transitions[next_state][state] * emissions[next_state][features[0]][data[t][features[0]]]
+                    partial = prob * transitions[next_state][state] * evidence
 
                     if partial > max_prob:
                         max_prob = partial

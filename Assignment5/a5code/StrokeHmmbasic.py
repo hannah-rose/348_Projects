@@ -126,7 +126,7 @@ class HMM:
                         self.emissions[s][f][i] /= float(len(featureVals[s][f])+self.numVals[f])
 
 # ***************************************************************
-# Implementation and testing of Viterbi algorithm
+# Implementation of Viterbi algorithm
 # ***************************************************************
            
     def label( self, data ):
@@ -138,9 +138,17 @@ class HMM:
 
         # Initialize trellis to be an empty dictionary
         trellis = {};
+
         # Add states and their prior probabilities to the trellis
         for state in self.states:
-            prob = self.priors[state] * self.emissions[state][self.featureNames[0]][data[0][self.featureNames[0]]]
+            #Calculate probability of the observed evidence, given each initial state
+            init_evidence = 1;
+            for feature in self.featureNames:
+                # Multiply the probability of that feature occuring times the probability
+                # of the rest of the evidence observed at the given time step
+                init_evidence = init_evidence * self.emissions[state][feature][data[0][feature]]
+            prob = self.priors[state] * init_evidence
+            #print state+": "+str(prob)
             trellis[state] = ([state], prob)
         
         # Loop through observation timesteps
@@ -155,12 +163,19 @@ class HMM:
                 for state in self.states:
                     # Get path and priors from the trellis
                     path, prob = copy.deepcopy(trellis[state])
-                    transitions = copy.deepcopy(self.transitions)
-                    emissions = copy.deepcopy(self.emissions)
-                    features = copy.deepcopy(self.featureNames)
+                    transitions = self.transitions
+                    emissions = self.emissions
+                    features = self.featureNames
+
+                    #Calculate probability of the observed evidence, given the state
+                    evidence = 1;
+                    for feature in features:
+                        # Multiply the probability of that feature occuring times the probability
+                        # of the rest of the evidence observed at the given time step
+                        evidence = evidence * emissions[next_state][feature][data[t][feature]]
 
                     # Partial probability at that state
-                    partial = prob * transitions[next_state][state] * emissions[next_state][features[0]][data[t][features[0]]]
+                    partial = prob * transitions[next_state][state] * evidence
 
                     if partial > max_prob:
                         max_prob = partial
@@ -208,9 +223,12 @@ def test_viterbi():
 
         # Example HMM created off the weather example from class
         states = ['sunny', 'cloudy', 'rainy']
-        features = ['groundstate']
-        contOrDisc = {'groundstate': 1}
-        numVals = {'groundstate': 4}
+        features = ['groundstate', 'temp']
+        #features = {'groundstate'}
+        contOrDisc = {'groundstate': 1, 'temp': 1}
+        #contOrDisc = {'groundstate': 1}
+        numVals = {'groundstate': 4, 'temp': 2}
+        #numVals = {'groundstate': 4}
 
         # HMM(states,features,contOrDisc,numVals)
         myModel = HMM(states,features,contOrDisc,numVals)
@@ -218,15 +236,20 @@ def test_viterbi():
         # Simulate training
         myModel.priors = {'sunny': 0.63, 'cloudy': 0.17, 'rainy': 0.20}
         # groundstate: dry, dryish, damp, soggy
-        myModel.emissions = {'sunny':{'groundstate':[0.6, 0.2, 0.15, 0.05]},
-                                'cloudy':{'groundstate':[0.25, 0.25, 0.25, 0.25]},
-                                'rainy':{'groundstate':[0.05, 0.10, 0.35, 0.5]}}
+        #myModel.emissions = {'sunny':{'groundstate':[0.6, 0.2, 0.15, 0.05]},
+        #                        'cloudy':{'groundstate':[0.25, 0.25, 0.25, 0.25]},
+        #                        'rainy':{'groundstate':[0.05, 0.10, 0.35, 0.5]}}
+        myModel.emissions = {'sunny':{'groundstate':[0.6, 0.2, 0.15, 0.05], 'temp':[0.8,0.2]},
+                                'cloudy':{'groundstate':[0.25, 0.25, 0.25, 0.25], 'temp':[0.5,0.5]},
+                                'rainy':{'groundstate':[0.05, 0.10, 0.35, 0.5], 'temp':[0.3,0.7]}}
         myModel.transitions = {'sunny':{'sunny': 0.5, 'cloudy': 0.25, 'rainy': 0.250},
                                 'cloudy':{'sunny': 0.375, 'cloudy': 0.125, 'rainy': 0.375},
                                 'rainy':{'sunny': 0.125, 'cloudy': 0.675, 'rainy': 0.375}}
 
-        # Data: dry, damp, soggy
-        data = [{'groundstate': 0},{'groundstate': 2},{'groundstate': 3}]
+        # Data: dry, dry-ish damp, soggy
+        #data = [{'groundstate': 0},{'groundstate': 2},{'groundstate': 3}]
+        # Data: hot, cold
+        data = [{'groundstate': 0, 'temp': 0},{'groundstate': 2, 'temp': 1},{'groundstate': 3, 'temp': 1}]
 
         return myModel, data      
 
