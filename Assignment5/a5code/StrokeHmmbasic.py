@@ -543,6 +543,27 @@ class StrokeLabeler:
             print "PROBLEM: number of strokes and labels must match"
             print "numStrokes is", len(strokes), "numLabels is", len(labels)
         return strokes, labels
+        
+        
+    def confusion(trueLabels, classifications):
+        #first is the true Label, second is the label given        
+        drawingDrawing=0
+        drawingText=0
+        textDrawing=0
+        textText=0        
+        for results in range(len(trueLabels)):
+            if trueLabels[results]=="drawing":
+                if classifications[results]=="drawing":
+                    drawingDrawing+=1
+                else:
+                    drawingText+=1
+            else:
+                if classifications[results]=="drawing":
+                    textDrawing+=1
+                else:
+                    textText+=1
+        resultsDict={'drawing':{'drawing':drawingDrawing, 'text':drawingText}, 'text':{'drawing':textDrawing,'text':textText}}
+        return resultsDict
 
 class Stroke:
     ''' A class to represent a stroke (series of xyt points).
