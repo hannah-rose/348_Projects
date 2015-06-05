@@ -266,7 +266,7 @@ class StrokeLabeler:
             else:
                 d['length'] = 1
             a = s.boundingBoxArea()
-            if a< 1000:
+            if a< 10000:
                 d['area'] = 0
             else:
                 d['area'] = 1
@@ -316,6 +316,7 @@ class StrokeLabeler:
             print "Label is", labels[i]
             print "Length is", strokes[i].length()
             print "Curvature is", strokes[i].sumOfCurvature(abs)
+
     
     def labelFile( self, strokeFile, outFile ):
         ''' Label the strokes in the file strokeFile and save the labels
@@ -565,6 +566,29 @@ class StrokeLabeler:
             allLabels.extend(labels)
         
         return allLabels,myLabels
+        
+    def featureBatch(self, trainingDir):
+        for fFileObj in os.walk(trainingDir):
+            lFileList = fFileObj[2]
+            break
+        goodList = []
+        for x in lFileList:
+            if not x.startswith('.'):
+                goodList.append(x)
+        
+        tFiles = [ trainingDir + "/" + f for f in goodList ] 
+        text=[]
+        draw=[]
+        for f in tFiles:
+            strokes, labels = self.loadLabeledFile( f )
+            for strokeNum in range(len(strokes)):
+                area=strokes[strokeNum].boundingBoxArea()
+                if labels[strokeNum]=='text':
+                    text.append(area)
+                else:
+                    draw.append(area)
+        return text,draw
+
         
 
 class Stroke:

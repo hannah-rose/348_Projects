@@ -6,9 +6,12 @@ Created on Thu Jun 04 22:26:09 2015
 """
 execfile("StrokeHmm.py")
 sl = StrokeLabeler()
+#text,draw=sl.featureBatch("../trainingFiles/")
+#"""
 sl.trainHMMDir("../trainingFiles/")
 labels,myLabels=sl.testBatch("../trainingFiles/")
 print len(labels)
 print len(myLabels)
 returns=sl.confusion(labels,myLabels)
 print returns
+#"""
