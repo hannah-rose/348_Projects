@@ -568,7 +568,7 @@ class StrokeLabeler:
         return strokes, labels
         
         
-    def confusion(trueLabels, classifications):
+    def confusion(self, trueLabels, classifications):
         #first is the true Label, second is the label given        
         drawingDrawing=0
         drawingText=0
@@ -587,6 +587,28 @@ class StrokeLabeler:
                     textText+=1
         resultsDict={'drawing':{'drawing':drawingDrawing, 'text':drawingText}, 'text':{'drawing':textDrawing,'text':textText}}
         return resultsDict
+        
+    def testBatch(self, trainingDir):
+        for fFileObj in os.walk(trainingDir):
+            lFileList = fFileObj[2]
+            break
+        goodList = []
+        for x in lFileList:
+            if not x.startswith('.'):
+                goodList.append(x)
+        
+        tFiles = [ trainingDir + "/" + f for f in goodList ]        
+        
+        
+        myLabels=[]
+        allLabels=[]
+        for f in tFiles:
+            print "Loading file", f, "for training"
+            strokes, labels = self.loadLabeledFile( f )
+            myLabels.extend(self.labelStrokes(strokes))
+            allLabels.extend(labels)
+        
+        return allLabels,myLabels
 
 class Stroke:
     ''' A class to represent a stroke (series of xyt points).
